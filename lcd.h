@@ -11,9 +11,9 @@
 void initSPI();
 void lcdClear();
 void lcdInitialize();
-void displayScreen(String Message);
-void scrollDisplay(String Message);
+void displayScreen(char * Message);
+void scrollDisplay(char * Message);
 void scrollMessage();
-
+void buttonInitialize();
 
 #endif /* LCD_H_ */
