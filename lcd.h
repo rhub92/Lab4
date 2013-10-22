@@ -1,9 +1,4 @@
-/*
- * lcd.h
- *
- *  Created on: Oct 20, 2013
- *      Author: c15ryan.hub
- */
+#include <msp430.h>
 
 #ifndef LCD_H_
 #define LCD_H_
