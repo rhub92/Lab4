@@ -91,7 +91,7 @@ void writeDataByte(char dataByte)
 {
     LCDCON |= RS_MASK;
     LCDWRT8(dataByte);
-    _delay_cycles(0x000a);
+    _delay_cycles(0xeeee);
 }
 
 void lcdClear() {
@@ -129,4 +129,23 @@ void displayScreen(char * message) {
 	for (i = 0; i <= length; i++) {
 		writeDataByte(message[i]);
 	}
+}
+
+
+void scrollDisplay( char * message) {
+	lcdClear();
+	char * originalMessage = message;
+	int i;
+	int j = 0;
+	while(1) {
+	for(i = 0; i < 8; i++) {
+		writeDataByte(message[i+j]);
+		if(message[i+j] == '!') {
+			scrollDisplay(originalMessage);
+		}
+	}
+	lcdClear();
+	j++;
+	}
+
 }
