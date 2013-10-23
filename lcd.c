@@ -166,7 +166,7 @@ void buttonInitialize() {
 
 
 void buttonSelect() {
-	while((BIT1 & P1IN)) {
+	while((BIT1 & P1IN)  && (BIT2 & P1IN) && (BIT3 & P1IN)) {
 
 	}
 
