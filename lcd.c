@@ -149,3 +149,25 @@ void scrollDisplay( char * message) {
 	}
 
 }
+
+void buttonInitialize() {
+	P1OUT |= BIT1;
+	P1REN |= BIT1;
+	P1DIR &= ~BIT1;
+
+	P1OUT |= BIT2;
+	P1REN |= BIT2;
+	P1DIR &= ~BIT2;
+
+	P1OUT |= BIT3;
+	P1REN |= BIT3;
+	P1DIR &= ~BIT3;
+}
+
+
+void buttonSelect() {
+	while((BIT1 & P1IN)) {
+
+	}
+
+}

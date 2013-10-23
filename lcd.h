@@ -10,6 +10,7 @@ void displayScreen(char * Message);
 void scrollDisplay(char * Message);
 void scrollMessage();
 void buttonInitialize();
+void buttonSelect();
 void writeDataByte(char dataByte);
 
 #endif /* LCD_H_ */

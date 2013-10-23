@@ -11,8 +11,12 @@ void main(void) {
     lcdInitialize();
     lcdClear();
 
-
+    displayScreen(press);
+    buttonInitialize();
+    buttonSelect();
     scrollDisplay(topScroll);
+
+    //scrollDisplay(topScroll);
 
     //displayScreen(message);
     //displayScreen(press);
