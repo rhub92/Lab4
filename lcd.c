@@ -1,8 +1,9 @@
 #include "lcd.h"
 
-char LCDCON, LCDSEND, LCDDATA;
+char LCDCON = 0;
 
-char r4;
+#define RS_MASK 0x40
+
 
 void setSS_HI() {
 	P1OUT |= BIT0;
@@ -14,47 +15,41 @@ void setSS_LO() {
 
 
 void spiSEND(char inputByte) {
+	char readByte;
 	setSS_LO();
 	UCB0TXBUF = inputByte;
 
-	while (UCB0RXIFG == IFG2) {
-		IFG2 = UCB0RXIFG;
+	while (!(UCB0RXIFG & IFG2)) {
+		// wait until you've received a byte
 	}
-		r4 = UCB0TXBUF;
+
+	readByte = UCB0RXBUF;
 
 	setSS_HI();
 }
 
-
-
-
-void LCDWRT4 (char LCDCON, char LCDDATA) {
-	char tempR5;
-	tempR5 = LCDDATA;
-	tempR5 &= 0x0f;
-	tempR5 |= LCDCON;
-	spiSEND(0x0);
+void LCDWRT4 (char sendByte) {
+	sendByte &= 0x0f;
+	sendByte |= LCDCON;
+	sendByte &= 0x7f;
+	spiSEND(sendByte);
 	_delay_cycles(0x0238);
-	tempR5 |= 0x80;
-	spiSEND(0x0);
+	sendByte |= 0x80;
+	spiSEND(sendByte);
 	_delay_cycles(0x0238);
-	tempR5 &= 0x7f;
-	spiSEND(0x0);
+	sendByte &= 0x7f;
+	spiSEND(sendByte);
 	_delay_cycles(0x0238);
-
 }
 
-void LCDWRT8(char LCDSEND) {
-	char tempR5;
-	tempR5 = LCDSEND;
-	tempR5 &= 0xf0;
-	tempR5 >> 4;
-	LCDDATA = tempR5;
-	LCDWRT4(0, LCDDATA);
-	tempR5 = LCDSEND;
-	tempR5 &= 0x0f;
-	LCDDATA = tempR5;
-	LCDWRT4(LCDCON,LCDDATA);
+void LCDWRT8(char byteToSend) {
+	unsigned char sendByte = byteToSend;
+	sendByte &= 0xF0;
+	sendByte = sendByte >> 4;
+	LCDWRT4(sendByte);
+	sendByte = byteToSend;
+	sendByte &= 0x0f;
+	LCDWRT4(sendByte);
 }
 
 void initSPI() {
@@ -62,7 +57,7 @@ void initSPI() {
 	UCB0CTL1 |= UCSWRST;
 	UCB0CTL0 |= UCCKPL|UCMSB|UCMST|UCSYNC;
 	UCB0CTL1 |= UCSSEL1;
-	UCB0STAT |= UCLISTEN;
+	//UCB0STAT |= UCLISTEN;
 
 	P1SEL |= BIT5;
 	P1SEL2 |= BIT5;
@@ -78,66 +73,52 @@ void initSPI() {
 	UCB0CTL1 &= ~UCSWRST;
 }
 
-
-
-
-void lcdClear() {
-	LCDCON = 0x0;
-	LCDSEND = 0x1;
-	LCDWRT8(LCDSEND);
-	_delay_cycles(0x0238);
-	LCDCON = 0x40;
-	_delay_cycles(0x000a);
+void writeCommandNibble(char commandNibble)
+{
+    LCDCON &= ~RS_MASK;
+    LCDWRT4(commandNibble);
+    _delay_cycles(0x000a);
 }
 
+void writeCommandByte(char commandByte)
+{
+    LCDCON &= ~RS_MASK;
+    LCDWRT8(commandByte);
+    _delay_cycles(0x000a);
+}
+
+void writeDataByte(char dataByte)
+{
+    LCDCON |= RS_MASK;
+    LCDWRT8(dataByte);
+    _delay_cycles(0x000a);
+}
+
+void lcdClear() {
+	writeCommandByte(1);
+}
 
 void lcdInitialize() {
-	setSS_HI();
-	LCDCON = 0x0;
-	LCDDATA = 0x3;
-	LCDWRT4(LCDCON, LCDDATA);
-	_delay_cycles(0x0238);
+	writeCommandNibble(0x03);
 
-	LCDDATA = 0x3;
-	LCDWRT4(LCDCON, LCDDATA);
-	_delay_cycles(0x000a);
+	writeCommandNibble(0x03);
 
-	LCDDATA = 0x3;
-	LCDWRT4(LCDCON, LCDDATA);
-	_delay_cycles(0x000a);
+	writeCommandNibble(0x03);
 
-	LCDDATA = 0x2;
-	LCDWRT4(LCDCON, LCDDATA);
-	_delay_cycles(0x000a);
+	writeCommandNibble(0x02);
 
+	writeCommandByte(0x28);
 
-	LCDSEND = 0x28;
-	LCDWRT8(LCDSEND);
-	_delay_cycles(0x0238);
+	writeCommandByte(0x0C);
 
-	LCDSEND = 0x0c;
-	LCDWRT8(LCDSEND);
-	_delay_cycles(0x0238);
+	writeCommandByte(0x01);
 
-	LCDSEND = 0x01;
-	LCDWRT8(LCDSEND);
-	_delay_cycles(0x000a);
+	writeCommandByte(0x06);
 
-	LCDSEND = 0x06;
-	LCDWRT8(LCDSEND);
-	_delay_cycles(0x0238);
+	writeCommandByte(0x01);
 
-	LCDSEND = 0x01;
-	LCDWRT8(LCDSEND);
-	_delay_cycles(0x0238);
-
-	LCDSEND = 0x02;
-	LCDWRT8(LCDSEND);
-	_delay_cycles(0x0238);
+	writeCommandByte(0x02);
 
 	spiSEND(0x0);
 	_delay_cycles(0x000a);
 }
-
-
-

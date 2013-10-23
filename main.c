@@ -9,4 +9,6 @@ void main(void) {
     lcdInitialize();
     lcdClear();
 
+    writeDataByte('a');
+    while(1){};
 }
