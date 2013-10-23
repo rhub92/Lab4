@@ -122,3 +122,11 @@ void lcdInitialize() {
 	spiSEND(0x0);
 	_delay_cycles(0x000a);
 }
+
+void displayScreen(char * message) {
+	int length = 29;
+	int i;
+	for (i = 0; i <= length; i++) {
+		writeDataByte(message[i]);
+	}
+}
