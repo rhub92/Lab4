@@ -1,8 +1,10 @@
 #include "lcd.h"
 
+
 char LCDCON = 0;
 
 #define RS_MASK 0x40
+
 
 
 void setSS_HI() {
@@ -91,7 +93,7 @@ void writeDataByte(char dataByte)
 {
     LCDCON |= RS_MASK;
     LCDWRT8(dataByte);
-    _delay_cycles(0xeeee);
+    _delay_cycles(0x238);
 }
 
 void lcdClear() {
@@ -124,31 +126,52 @@ void lcdInitialize() {
 }
 
 void displayScreen(char * message) {
-	int length = 29;
+	int lineLength = 8;
 	int i;
-	for (i = 0; i <= length; i++) {
+	for (i = 0; i <= lineLength; i++) {
 		writeDataByte(message[i]);
 	}
 }
 
-
-void scrollDisplay( char * message) {
-	lcdClear();
-	char * originalMessage = message;
+void rotateString(char * stringToRotate, int stringLength)
+{
+	char firstChar = *stringToRotate;
 	int i;
-	int j = 0;
-	while(1) {
-	for(i = 0; i < 8; i++) {
-		writeDataByte(message[i+j]);
-		if(message[i+j] == '!') {
-			scrollDisplay(originalMessage);
-		}
-	}
-	lcdClear();
-	j++;
+	for (i = 0; i < stringLength; i++)
+	{
+		stringToRotate[i] = stringToRotate[i+1];
 	}
 
+	stringToRotate[stringLength] = firstChar;
 }
+
+void printString(char * string)
+{
+	int i;
+	for (i = 0; i < 8; i++)
+	{
+		writeDataByte(string[i]);
+	}
+}
+
+void scrollDisplay(char message[], char message1[]) {
+	lcdClear();
+	while (1) {
+
+		writeCommandByte(0x80);
+		printString(message);
+		rotateString(message, 28);
+		_delay_cycles(0xf00f);
+
+
+		writeCommandByte(0xc0);
+		printString(message1);
+		rotateString(message1, 28);
+		_delay_cycles(0xf00f);
+	}
+}
+
+
 
 void buttonInitialize() {
 	P1OUT |= BIT1;
@@ -163,6 +186,8 @@ void buttonInitialize() {
 	P1REN |= BIT3;
 	P1DIR &= ~BIT3;
 }
+
+
 
 
 void buttonSelect() {
