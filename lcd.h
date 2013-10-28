@@ -1,3 +1,11 @@
+/*
+ * lcd.h
+ * Author: Ryan Hub
+ * Date: 27 October 2013
+ * Description: Library to interact with the Geek Box LCD
+ */
+
+
 #include <msp430.h>
 
 #ifndef LCD_H_
@@ -8,12 +16,9 @@ void lcdClear();
 void lcdInitialize();
 void displayScreen(char * Message);
 void scrollDisplay(char Message[], char Message1[]);
-void scrollMessage();
 void buttonInitialize();
 void buttonSelect();
-void writeDataByte(char dataByte);
 void writeCommandByte(char commandByte);
-//void 1MHZCLOCK();
+void goToBottomLine();
 
-
-#endif /* LCD_H_ */
+#endif
